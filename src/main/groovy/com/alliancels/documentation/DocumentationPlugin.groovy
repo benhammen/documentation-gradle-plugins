@@ -5,23 +5,30 @@ import org.gradle.api.Plugin
 
 class DocumentationPlugin implements Plugin<Project> {
 
+    File convertedMarkdown
+    File links
+    File documentationOutput
+
+    String userRequirementsDir
+    String designRequirementsDir
+    String testRequirementsDir
+    String developerDocumentationDir
+    List<String> allRequirementsDirs
+    List<String> allDocumentationDirs
+
     void apply(Project project) {
 
-        String userRequirementsDir = 'UserRequirements'
-        String designRequirementsDir = 'DesignRequirements'
-        String developerDocumentationDir = 'DeveloperDocumentation'
+        userRequirementsDir = 'UserRequirements'
+        designRequirementsDir = 'DesignRequirements'
+        developerDocumentationDir = 'DeveloperGuide'
+        testRequirementsDir = 'TestRequirements'
 
-        String functionalTestSpecificationsDir = 'DesignRequirements/FunctionalTest'
+        allRequirementsDirs = [userRequirementsDir, designRequirementsDir, testRequirementsDir]
+        allDocumentationDirs = [*allRequirementsDirs, developerDocumentationDir]
 
-        List<String> testableDocumentationDirs = [userRequirementsDir, designRequirementsDir]
-        List<String> allDocumentationDirs = [userRequirementsDir, designRequirementsDir, developerDocumentationDir]
-
-        def documentationOutput = new File(project.buildDir, 'documentation/')
-        def allRequirementsOutput = new File(documentationOutput, 'allRequirements/')
-        def previewRequirementsOutput = new File(documentationOutput, 'previewRequirements/')
-        def userRequirementsOnlyOutput = new File(documentationOutput, 'userRequirementsOnly/')
-        def convertedMarkdown = new File(documentationOutput, 'convertedMarkdown')
-        def links = new File(documentationOutput, 'links')
+        documentationOutput = new File(project.buildDir, 'documentation/')
+        convertedMarkdown = new File(documentationOutput, 'convertedMarkdown')
+        links = new File(documentationOutput, 'links')
 
         project.extensions.create('documentation', DocumentationPluginExtension.class)
 
@@ -32,65 +39,34 @@ class DocumentationPlugin implements Plugin<Project> {
             source allDocumentationDirs
         }
 
+        createTasksUserRequirementsOnly(project)
+        createTasksTestRequirementsOnly(project)
+        createTasksRequirements(project)
+        createTasksPreview(project)
+
+        project.tasks.each {
+            it.group = "DocumentationPlugin"
+        }
+    }
+
+    void createTasksRequirements(Project project) {
+
+        def allRequirementsOutput = new File(documentationOutput, 'allRequirements/')
+
         project.task('copyImagesAllRequirements', type: FileCopyTask) {
-            description = "Copy images into the requirements output"
+            description = "Copy images into the requirements output."
             include "**/Images/**"
             outputDir = allRequirementsOutput
-            source allDocumentationDirs
-        }
-
-        project.task('copyImagesPreviewRequirements', type: FileCopyTask) {
-            description = "Copy images into the requirements preview output"
-            include "**/Images/**"
-            outputDir = previewRequirementsOutput
-            source allDocumentationDirs
-        }
-
-        project.task('copyImagesUserRequirementsOnly', type: FileCopyTask) {
-            description = "Copy images into the user requirements output"
-            include "**/Images/**"
-            outputDir = userRequirementsOnlyOutput
-            source userRequirementsDir
-        }
-
-        project.task('navigationUserRequirements', type: NavigationHtmlTask) {
-            description = "Create navigation page and navigation links"
-            include "**/layout.yaml"
-            exclude "DesignRequirements/**"
-            linkOutputDir = links
-            navigationOutputDir = userRequirementsOnlyOutput
-            documentSourceDirs = [userRequirementsDir]
-            source designRequirementsDir, userRequirementsDir
+            source allRequirementsDirs
         }
 
         project.task('navigationAllRequirements', type: NavigationHtmlTask) {
-            description = "Create navigation page and navigation links"
+            description = "Create navigation page and navigation links."
             include "**/layout.yaml"
             linkOutputDir = links
             navigationOutputDir = allRequirementsOutput
-            documentSourceDirs = [designRequirementsDir, userRequirementsDir]
-            source designRequirementsDir, userRequirementsDir
-        }
-
-        project.task('navigationPreviewRequirements', type: NavigationHtmlTask) {
-            description = "Create navigation page and navigation links"
-            include "**/layout.yaml"
-            linkOutputDir = links
-            navigationOutputDir = previewRequirementsOutput
-            documentSourceDirs = [designRequirementsDir, userRequirementsDir]
-            source designRequirementsDir, userRequirementsDir
-        }
-
-        project.task('assembleUserRequirementsOnly', type: AssembleDocumentTask,
-                dependsOn: ['markdownToHtml', 'navigationUserRequirements', 'copyImagesUserRequirementsOnly']) {
-            description = "Assemble User Requirements, with no test or status reports."
-            outputDir = userRequirementsOnlyOutput
-            linkDir = links
-            convertedMarkdownDir = convertedMarkdown
-            source links, convertedMarkdown
-            include "**/section.html"
-            exclude "DesignRequirements/**"
-            previewEnabled = false
+            documentSourceDirs = allRequirementsDirs
+            source allRequirementsDirs
         }
 
         project.task('assembleRequirements', type: AssembleDocumentTask,
@@ -100,25 +76,106 @@ class DocumentationPlugin implements Plugin<Project> {
             linkDir = links
             convertedMarkdownDir = convertedMarkdown
             source links, convertedMarkdown
-            include "**/section.html"
+            include "DesignRequirements/**/section.html"
+            include "UserRequirements/**/section.html"
+            include "TestRequirements/**/section.html"
             previewEnabled = false
         }
+    }
 
-        project.task('previewRequirements', type: AssembleDocumentTask,
-                dependsOn: ['markdownToHtml', 'navigationPreviewRequirements', 'copyImagesPreviewRequirements']) {
+    void createTasksUserRequirementsOnly(Project project) {
+
+        def userRequirementsOnlyOutput = new File(documentationOutput, 'userRequirementsOnly/')
+
+        project.task('copyImagesUserRequirementsOnly', type: FileCopyTask) {
+            description = "Copy images into the user requirements output."
+            include "**/Images/**"
+            outputDir = userRequirementsOnlyOutput
+            source userRequirementsDir
+        }
+
+        project.task('navigationUserRequirementsOnly', type: NavigationHtmlTask) {
+            description = "Create navigation page and navigation links."
+            include "**/layout.yaml"
+            linkOutputDir = links
+            navigationOutputDir = userRequirementsOnlyOutput
+            documentSourceDirs = [userRequirementsDir]
+            source userRequirementsDir
+        }
+
+        project.task('assembleUserRequirementsOnly', type: AssembleDocumentTask,
+                dependsOn: ['markdownToHtml', 'navigationUserRequirementsOnly', 'copyImagesUserRequirementsOnly']) {
+            description = "Assemble User Requirements, with no test or status reports."
+            outputDir = userRequirementsOnlyOutput
+            linkDir = links
+            convertedMarkdownDir = convertedMarkdown
+            source links, convertedMarkdown
+            include "UserRequirements/**/section.html"
+            previewEnabled = false
+        }
+    }
+
+    void createTasksTestRequirementsOnly(Project project) {
+
+        def testRequirementsOnlyOutput = new File(documentationOutput, 'testRequirementsOnly/')
+
+        project.task('copyImagesTestRequirementsOnly', type: FileCopyTask) {
+            description = "Copy images into the functional test requirements output."
+            include "**/Images/**"
+            outputDir = testRequirementsOnlyOutput
+            source testRequirementsDir
+        }
+
+        project.task('navigationTestRequirementsOnly', type: NavigationHtmlTask) {
+            description = "Create navigation page and navigation links."
+            include "**/layout.yaml"
+            linkOutputDir = links
+            navigationOutputDir = testRequirementsOnlyOutput
+            documentSourceDirs = [testRequirementsDir]
+            source testRequirementsDir
+        }
+
+        project.task('assembleTestRequirementsOnly', type: AssembleDocumentTask,
+                dependsOn: ['markdownToHtml', 'navigationTestRequirementsOnly', 'copyImagesTestRequirementsOnly']) {
+            description = "Assemble Product Functional Test Requirements, with no test or status reports."
+            outputDir = testRequirementsOnlyOutput
+            linkDir = links
+            convertedMarkdownDir = convertedMarkdown
+            source links, convertedMarkdown
+            include "TestRequirements/**/section.html"
+            previewEnabled = false
+        }
+    }
+
+    void createTasksPreview(Project project) {
+
+        def previewOutput = new File(documentationOutput, 'previewAll/')
+
+        project.task('copyImagesPreview', type: FileCopyTask) {
+            description = "Copy images into the requirements preview output"
+            include "**/Images/**"
+            outputDir = previewOutput
+            source allDocumentationDirs
+        }
+        project.task('navigationPreview', type: NavigationHtmlTask) {
+            description = "Create navigation page and navigation links"
+            include "**/layout.yaml"
+            linkOutputDir = links
+            navigationOutputDir = previewOutput
+            documentSourceDirs = allDocumentationDirs
+            source allDocumentationDirs
+        }
+        project.task('assemblePreview', type: AssembleDocumentTask,
+                dependsOn: ['markdownToHtml', 'navigationPreview', 'copyImagesPreview']) {
             description = "Same as assemble requirements, but with browser auto-refresh enabled.  Intended to be" +
                     "used in conjunction with Gradle's continuous build option (-t) to allow a live preview to be shown" +
                     "whenever the source markdown is edited."
-            outputDir = previewRequirementsOutput
+            outputDir = previewOutput
             linkDir = links
             convertedMarkdownDir = convertedMarkdown
             source links, convertedMarkdown
             include "**/section.html"
             previewEnabled = true
-        }
-
-        project.tasks.each {
-            it.group = "DocumentationPlugin"
         }
     }
 }

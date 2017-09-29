@@ -119,22 +119,6 @@ The output will be in the <project>\build\requirements folder.
 
 The root file that should be opened is called navigation.html.
 
-#### Assemble all requirements with live preview
-
-Manually invoking a rebuilt of the HTML site after making a change is tedius.  To avoid this, it can
-be auto-rebuilt whenver a requirements source file is saved.  To allow this type of "live preview" of
-the generated HTML site, enable automatic continuous rebuild and enable browser
-auto-refresh of the section HTML with the following command:
-
-	gradlew previewRequirements --continuous
-
-Or abbreviate with:
-
-	gradlew pR -t
-
-Changes to existing markdown files will be visible shortly after saving.  Changes to the the folder
-structure of layout.yaml files will require the browser to be manually refreshed.
-
 #### Assemble only user requirements
 
 To assemble only the user requirements, invoke the following Gradle command, which excludes the design
@@ -145,6 +129,33 @@ requirements from the output:
 Or abbreviate with:
 
 	gradlew aURO
+
+### Assemble only test requirements
+
+To assemble only the test requirements, invoke the following Gradle command, which excludes the design
+requirements from the output:
+
+	gradlew assembleTestRequirementsOnly
+	
+Or abbreviate with:
+
+	gradlew aTRO
+
+#### Assemble all documentation with live preview
+
+Manually invoking a rebuild of the HTML site after making a change is tedius.  To avoid this, it can
+be auto-rebuilt whenver a requirements source file is saved.  To allow this type of "live preview" of
+the generated HTML site, enable automatic continuous rebuild and enable browser
+auto-refresh of the section HTML with the following command:
+
+	gradlew aP --continuous
+
+Or abbreviate with:
+
+	gradlew aP -t
+
+Changes to existing markdown files will be visible shortly after saving.  Changes to the the folder
+structure of layout.yaml files will require the browser to be manually refreshed.
 
 # Build
 
