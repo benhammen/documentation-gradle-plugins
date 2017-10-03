@@ -21,11 +21,11 @@ class LayoutParser {
         // Add explicitly ordered subfolders; throw an exception if any don't exist
         sectionLayout.orderedSubfolders.each {
 
-            File subfolder = new File(layoutYaml, it)
+            File subfolder = new File(layoutYaml.parentFile, it)
             File subfolderYaml = new File(subfolder, 'layout.yaml')
 
             if (subfolderYaml.exists()) {
-                section.subsectionFolderNames.add(subfolder.path)
+                section.subsectionFolderNames.add(subfolder.name)
             } else {
                 GradleException("The layout file for explicitly ordered subfolder " + subfolder.toString() + " in " +
                         layoutYaml.toString() + " does not exist!  Remove the subfolder from the layout file, or" +
