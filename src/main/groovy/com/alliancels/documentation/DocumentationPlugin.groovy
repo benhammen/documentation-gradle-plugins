@@ -42,7 +42,8 @@ class DocumentationPlugin implements Plugin<Project> {
         createTasksUserRequirementsOnly(project)
         createTasksTestRequirementsOnly(project)
         createTasksRequirements(project)
-        createTasksPreview(project)
+        createTasksAll(project)
+        createTasksPreviewAll(project)
 
         project.tasks.each {
             it.group = "DocumentationPlugin"
@@ -147,7 +148,7 @@ class DocumentationPlugin implements Plugin<Project> {
         }
     }
 
-    void createTasksPreview(Project project) {
+    void createTasksPreviewAll(Project project) {
 
         def previewOutput = new File(documentationOutput, 'previewAll/')
 
@@ -167,7 +168,7 @@ class DocumentationPlugin implements Plugin<Project> {
         }
         project.task('assemblePreview', type: AssembleDocumentTask,
                 dependsOn: ['markdownToHtml', 'navigationPreview', 'copyImagesPreview']) {
-            description = "Same as assemble requirements, but with browser auto-refresh enabled.  Intended to be" +
+            description = "Same as assemble all (Assemble, but with browser auto-refresh enabled.  Intended to be" +
                     "used in conjunction with Gradle's continuous build option (-t) to allow a live preview to be shown" +
                     "whenever the source markdown is edited."
             outputDir = previewOutput
@@ -176,6 +177,36 @@ class DocumentationPlugin implements Plugin<Project> {
             source links, convertedMarkdown
             include "**/section.html"
             previewEnabled = true
+        }
+    }
+
+    void createTasksAll(Project project) {
+
+        def allOutput = new File(documentationOutput, 'all/')
+
+        project.task('copyImagesAll', type: FileCopyTask) {
+            description = "Copy images into the requirements preview output"
+            include "**/Images/**"
+            outputDir = allOutput
+            source allDocumentationDirs
+        }
+        project.task('navigationAll', type: NavigationHtmlTask) {
+            description = "Create navigation page and navigation links"
+            include "**/layout.yaml"
+            linkOutputDir = links
+            navigationOutputDir = allOutput
+            documentSourceDirs = allDocumentationDirs
+            source allDocumentationDirs
+        }
+        project.task('assembleAll', type: AssembleDocumentTask,
+                dependsOn: ['markdownToHtml', 'navigationAll', 'copyImagesAll']) {
+            description = "Assembles all documentation"
+            outputDir = allOutput
+            linkDir = links
+            convertedMarkdownDir = convertedMarkdown
+            source links, convertedMarkdown
+            include "**/section.html"
+            previewEnabled = false
         }
     }
 }
