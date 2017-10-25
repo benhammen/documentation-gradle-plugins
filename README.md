@@ -148,7 +148,7 @@ be auto-rebuilt whenver a requirements source file is saved.  To allow this type
 the generated HTML site, enable automatic continuous rebuild and enable browser
 auto-refresh of the section HTML with the following command:
 
-	gradlew aP --continuous
+	gradlew assemblePreview --continuous
 
 Or abbreviate with:
 
@@ -156,6 +156,16 @@ Or abbreviate with:
 
 Changes to existing markdown files will be visible shortly after saving.  Changes to the the folder
 structure of layout.yaml files will require the browser to be manually refreshed.
+
+#### Assemble all documentation without live preview
+
+Same as the preview section, but without browser auto-refresh disabled.
+
+	gradlew assembleAll
+
+Or abbreviate:
+
+	gradlew aA
 
 # Build
 
