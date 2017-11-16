@@ -46,11 +46,10 @@ class AssembleDocumentTask extends SourceTask {
             // <nav links>
             File outputFile = getOutputFile(it.file)
             String relativeOutputFilePath = outputDir.toPath().relativize(outputFile.toPath()).toString()
-            def completeSection = HtmlPresenter.createSectionContentPage(relativeOutputFilePath,
-                    links + content + links, previewEnabled)
+            String completeSection = createCompleteSection(relativeOutputFilePath, links, content, previewEnabled)
             outputFile.parentFile.mkdirs()
             outputFile.createNewFile()
-            outputFile.write(completeSection)
+            outputFile.setBytes(completeSection.getBytes("UTF-8"))
         }
 
         inputs.removed {
@@ -60,6 +59,11 @@ class AssembleDocumentTask extends SourceTask {
                 outputFile.delete()
             }
         }
+    }
+
+    static String createCompleteSection(String relativeOutputFilePath, String links, String content, boolean previewEnabled) {
+        return HtmlPresenter.createSectionContentPage(relativeOutputFilePath,
+                links + content + links, previewEnabled)
     }
 
     File getOutputFile(File inputFile) {
