@@ -11,8 +11,8 @@ class MarkdownToHtmlTaskTest extends Specification {
     @Rule final TemporaryFolder testProjectDir = new TemporaryFolder()
     File buildFile
 
-    String markdown = '# title\n\ncontent'
-    String html = '<h1 id="title">title</h1>\n<p>content</p>\n'
+    String markdown = '# title\n\nUTF-8 content ₽'
+    String html = '<h1 id="title">title</h1>\n<p>UTF-8 content ₽</p>\n'
 
     def setup() {
         buildFile = testProjectDir.newFile('build.gradle')
@@ -21,7 +21,7 @@ class MarkdownToHtmlTaskTest extends Specification {
         userRequirementsFolder.mkdirs()
         File markdownFile1 = new File(userRequirementsFolder, 'section.md')
         markdownFile1.createNewFile()
-        markdownFile1 << markdown
+        markdownFile1.setBytes('# title\n\nUTF-8 content ₽'.getBytes('UTF-8'))
     }
 
     def "converts markdown file to html"() {
@@ -49,6 +49,6 @@ class MarkdownToHtmlTaskTest extends Specification {
         outputHtml1.exists()
 
         and:
-        outputHtml1.getText() == html
+        outputHtml1.getText('UTF-8') == html
     }
 }
