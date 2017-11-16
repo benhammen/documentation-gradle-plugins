@@ -51,4 +51,82 @@ class MarkdownToHtmlTaskTest extends Specification {
         and:
         outputHtml1.getText('UTF-8') == html
     }
+
+    def "converts UTF-8 codes to symbols"() {
+        given:
+        File markdown = testProjectDir.newFile('markdown')
+        String utf8Code = "&#8381;"
+        markdown.write(utf8Code)
+
+        when:
+        String html = MarkdownToHtmlTask.convertToHtml(markdown)
+
+        then:
+        html == "<p>₽</p>\n"
+    }
+
+    def "retains UTF-8 symbols"() {
+        given:
+        File markdown = testProjectDir.newFile('markdown')
+        String symbol = "₽"
+        markdown.setBytes(symbol.getBytes("UTF-8"))
+
+        when:
+        String html = MarkdownToHtmlTask.convertToHtml(markdown)
+
+        then:
+        html == "<p>₽</p>\n"
+    }
+
+    def "converts UTF-8 codes in markdown tables to symbols"() {
+        given:
+        File markdown = testProjectDir.newFile('markdown')
+
+        markdown.setBytes("""
+        column1 | column2
+        ---     | ---
+        &#8381; | &#8381;
+        """.stripIndent().getBytes("UTF-8"))
+
+        when:
+        String html = MarkdownToHtmlTask.convertToHtml(markdown)
+
+        then:
+        html == """
+                <table>
+                <thead>
+                <tr><th>column1</th><th>column2</th></tr>
+                </thead>
+                <tbody>
+                <tr><td>₽</td><td>₽</td></tr>
+                </tbody>
+                </table>
+                """.stripIndent().trim() + "\n"
+    }
+
+    def "retains UTF-8 symbols in markdown tables"() {
+        given:
+        File markdown = testProjectDir.newFile('markdown')
+
+        markdown.setBytes("""
+        column1 | column2
+        ---     | ---
+        ₽       | ₽
+        """.stripIndent().getBytes("UTF-8"))
+
+        when:
+        String html = MarkdownToHtmlTask.convertToHtml(markdown)
+
+        then:
+        html == """
+                <table>
+                <thead>
+                <tr><th>column1</th><th>column2</th></tr>
+                </thead>
+                <tbody>
+                <tr><td>₽</td><td>₽</td></tr>
+                </tbody>
+                </table>
+                """.stripIndent().trim() + "\n"
+    }
 }
