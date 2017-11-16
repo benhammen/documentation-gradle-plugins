@@ -43,7 +43,7 @@ class MarkdownToHtmlTask extends SourceTask {
             outputFile = convertMarkdownFileExtensionToHtml(outputFile)
             outputFile.parentFile.mkdirs()
             outputFile.createNewFile()
-            outputFile.write(convertToHtml(it.file))
+            outputFile.setBytes(convertToHtml(it.file).getBytes("UTF-8"))
         }
 
         inputs.removed {
