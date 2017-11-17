@@ -190,14 +190,24 @@ Commit and push changes to the maven repo.
 
 In general, this project should be tested using unit and integegration tests, as well as end-to-end tests with the
 [Gradle Test Kit](https://docs.gradle.org/current/userguide/test_kit.html).  In some cases, manual testing may also be
-needed.  In order to manually test without releasing a new version, the plugin needs to be published.
-To do this, follow the steps to publish in the previous section, but push the changes to the
-[maven repo](https://github.com/alliancels/maven-repo) on a temporary topic branch , rather than the release branch.
+needed.
+
+## Test using example project
+
+Go to the *example* project directory (`cd example`), and run tasks as a composite build that includes the plugin build:
+`gradlew --include-build .. <task>`
+
+For example, to run a task called "assembleAll", invoke `gradlew --include-build .. aA`.
+
+## Test using an external project
+
+In order to manually test without releasing a new version, the plugin still needs to be published.
+To do this, follow the steps to publish in the [Release new versions section](#release-new-versions), but push the changes to the
+[maven repo](https://github.com/alliancels/maven-repo) on a temporary topic branch, rather than the 'releases' branch.
 
 In the project that you want to perform the manual testing with, adjust the [Gradle Build Setup](#gradle-build-setup)
-to use your topic branch of the maven repo instead of the 'relases' branch.
-
-That is, replace `url 'https://github.com/alliancels/maven-repo/raw/releases'` with
+to use your topic branch of the maven repo instead of the 'releases' branch.  That is, replace
+`url 'https://github.com/alliancels/maven-repo/raw/releases'` with
 `url 'https://github.com/alliancels/maven-repo/raw/topicBranchName'`.
 
-When you are done testing, the topic branch used for testing can be purged.
+When you are done testing, the topic branch can be purged.
