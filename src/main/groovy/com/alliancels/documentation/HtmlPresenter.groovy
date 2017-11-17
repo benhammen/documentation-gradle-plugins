@@ -105,6 +105,7 @@ class HtmlPresenter {
         return """\
         <!DOCTYPE html>
         <html>
+            <meta charset="UTF-8">
             <!-- Make browser continually refresh page content, so updates can be seen without a manual or server-side refresh -->
                 ${metaRefresh}
             <style>
