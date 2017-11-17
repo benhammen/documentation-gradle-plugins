@@ -185,3 +185,19 @@ Publish library by invoking the `gradlew publish` command.  This will install th
 local maven repo.
 
 Commit and push changes to the maven repo.
+
+# Manual testing
+
+In general, this project should be tested using unit and integegration tests, as well as end-to-end tests with the
+[Gradle Test Kit](https://docs.gradle.org/current/userguide/test_kit.html).  In some cases, manual testing may also be
+needed.  In order to manually test without releasing a new version, the plugin needs to be published.
+To do this, follow the steps to publish in the previous section, but push the changes to the
+[maven repo](https://github.com/alliancels/maven-repo) on a temporary topic branch , rather than the release branch.
+
+In the project that you want to perform the manual testing with, adjust the [Gradle Build Setup](#gradle-build-setup)
+to use your topic branch of the maven repo instead of the 'relases' branch.
+
+That is, replace `url 'https://github.com/alliancels/maven-repo/raw/releases'` with
+`url 'https://github.com/alliancels/maven-repo/raw/topicBranchName'`.
+
+When you are done testing, the topic branch used for testing can be purged.
