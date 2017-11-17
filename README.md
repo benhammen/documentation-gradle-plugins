@@ -8,35 +8,56 @@ Gradle plugin for helping with writing project requirements, tests plans for tho
 
 In the project gradle.build file, the Documentation library will need to be available to the build script:
 
-	buildscript {
-	    repositories {
-	        maven {
-	            url 'https://github.com/alliancels/maven-repo/raw/releases'
-	        }
-	    }
-	    dependencies {
-	        classpath 'com.alliancels:documentation-gradle-plugins:0.0.1'
-	        // Optionally add gitlib to allow retrieving repo info
-	        classpath 'com.alliancels:gitlib:0.0.1'
-	    }
-	}
+```
+buildscript {
+    repositories {
+        maven {
+            url 'https://github.com/alliancels/maven-repo/raw/releases'
+        }
+    }
+    dependencies {
+        classpath 'com.alliancels:documentation-gradle-plugins:0.0.7'
+    }
+}
+```
 
 Then the plugin will need to be applied.
 
-	import com.alliancels.documentation.DocumentationPlugin
-	apply plugin: DocumentationPlugin
+```
+import com.alliancels.documentation.DocumentationPlugin
+apply plugin: DocumentationPlugin
+```
 
 Finally, the plugin will need to be configured for the project:
 
-	// Optionally use gitlib to retrieve the version and date, rather than manually
-	// setting them
-	import com.alliancels.gitlib.*
-	
-	documentation {
-	    projectName = 'Midas Requirements'
-	    version = JGitGradle.getVersionTag(project) ?: "uncontrolled"
-	    date = JGitGradle.getDateTime(project)
-	}
+```
+// Define any number of documents to create, each built from any number of markdown source folders
+Document all = new Document()
+all.with {
+	name = "All"
+	sourceFolders = ['UserRequirements', 'DesignRequirements']
+	previewEnabled = false
+}
+
+Document preview = new Document()
+preview.with {
+	name = "Preview"
+	sourceFolders = ['UserRequirements', 'DesignRequirements']
+	previewEnabled = true
+}
+
+// Setup plug-in
+documentation {
+	// Project name
+    projectName = 'example'
+    // Document version
+    version = 'version'
+    // Document date
+    date = 'date'
+    // List of documents to create
+    documents = [all, preview]
+}
+```
 
 ### Requirements Source Folders
 
@@ -105,67 +126,72 @@ requirements.md example:
 	
 ### Build Documentation
 
-#### Assemble all requirements
+#### Assemble documents
 
-To assemble user and design requirements, invoke the following Gradle command:
+For each `Document` object defined in the build script, a task called `assemble<document name>' will be created.
+The output of the task will be in a folder matching the document name.  The root file of the generated document
+HTML site will be called `navigation.html`.
 
-	gradlew assembleRequirements
-	
-Or abbreviate with:
-	
-	gradlew aR
+For example, the following configuration will create tasks called "assembleAll" and "assemblePreview".  The
+output folders would be `build/documentation/All` and `build/documentation/Preview`.
 
-The output will be in the <project>\build\requirements folder.
+```
+Document all = new Document()
+all.with {
+	name = "All"
+	sourceFolders = ['UserRequirements', 'DesignRequirements']
+	previewEnabled = false
+}
 
-The root file that should be opened is called navigation.html.
+Document preview = new Document()
+preview.with {
+	name = "Preview"
+	sourceFolders = ['UserRequirements', 'DesignRequirements']
+	previewEnabled = true
+}
 
-#### Assemble only user requirements
+// Setup plug-in
+documentation {
+    projectName = 'example'
+    // Document version
+    version = 'version'
+    date = 'date'
+    documents = [all, preview]
+}
+```
 
-To assemble only the user requirements, invoke the following Gradle command, which excludes the design
-requirements from the output:
+To get a list of all documentation tasks that have been created, invoke `gradlew tasks` and look at the tasks listed in the
+*DocumentationPlugin tasks* group.
 
-	gradlew assembleUserRequirementsOnly
-	
-Or abbreviate with:
+Note that task names can be camcel-case abbreviated.  For example, a task called "assembleAll" can be invoked using only "aA".
 
-	gradlew aURO
-
-### Assemble only test requirements
-
-To assemble only the test requirements, invoke the following Gradle command, which excludes the design
-requirements from the output:
-
-	gradlew assembleTestRequirementsOnly
-	
-Or abbreviate with:
-
-	gradlew aTRO
-
-#### Assemble all documentation with live preview
+#### Assemble documentation with live preview
 
 Manually invoking a rebuild of the HTML site after making a change is tedius.  To avoid this, it can
-be auto-rebuilt whenver a requirements source file is saved.  To allow this type of "live preview" of
-the generated HTML site, enable automatic continuous rebuild and enable browser
-auto-refresh of the section HTML with the following command:
+be auto-rebuilt and redisplayed whenever a requirements source file is saved.
 
-	gradlew assemblePreview --continuous
+To allow this type of "live preview" of the generated HTML site, enable browser auto-refresh with setting the
+`previewEnabled` parameter of a document to "true":
 
-Or abbreviate with:
+```
+Document preview = new Document()
+preview.with {
+	name = "Preview"
+	sourceFolders = ['UserRequirements', 'DesignRequirements']
+	previewEnabled = true
+}
+```
 
-	gradlew aP -t
+Enable automatic continuous rebuild using the following command:
+
+`gradlew <task> --continuous`
+
+This can be abbreviated as `gradlew <task> -t`.
+
+Example: ``gradlew assemblePreview --continuous`
 
 Changes to existing markdown files will be visible shortly after saving.  Changes to the the folder
 structure of layout.yaml files will require the browser to be manually refreshed.
-
-#### Assemble all documentation without live preview
-
-Same as the preview section, but without browser auto-refresh disabled.
-
-	gradlew assembleAll
-
-Or abbreviate:
-
-	gradlew aA
 
 # Build
 
@@ -179,7 +205,7 @@ Clone [the maven repo](https://github.com/alliancels/maven-repo) to the same roo
         \repos\documentation-gradle-plugins
         \repos\maven-repo
 
-Push new version to this project's repo.
+Push the new version to this project's repo.
 
 Publish library by invoking the `gradlew publish` command.  This will install the library, source, and doc jars into the
 local maven repo.
