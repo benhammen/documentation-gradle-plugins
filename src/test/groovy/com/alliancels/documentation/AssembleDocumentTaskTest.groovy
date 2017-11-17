@@ -21,14 +21,16 @@ class AssembleDocumentTaskTest extends Specification {
         File documentationFolder = new File(buildFolder, 'documentation')
 
         File linksFolder = new File(documentationFolder, 'links')
-        linksFolder.mkdirs()
-        File linkFile = new File(linksFolder, 'section.html')
+        File userReqsLinkFolder = new File(linksFolder, 'UserRequirements')
+        userReqsLinkFolder.mkdirs()
+        File linkFile = new File(userReqsLinkFolder, 'section.html')
         linkFile.createNewFile()
         linkFile <<  linksContent
 
         File convertedMarkdownFolder = new File(documentationFolder, 'convertedMarkdown')
-        convertedMarkdownFolder.mkdirs()
-        File convertedMarkdownFile = new File(convertedMarkdownFolder, 'section.html')
+        File userReqsMarkdownFolder = new File(convertedMarkdownFolder, 'UserRequirements')
+        userReqsMarkdownFolder.mkdirs()
+        File convertedMarkdownFile = new File(userReqsMarkdownFolder, 'section.html')
         convertedMarkdownFile.createNewFile()
         convertedMarkdownFile.setBytes(utf8Content.getBytes('UTF-8'))
     }
@@ -38,6 +40,17 @@ class AssembleDocumentTaskTest extends Specification {
         buildFile << """
          plugins {
             id 'com.alliancels.documentation'
+        }
+        
+        import com.alliancels.documentation.Document
+        Document all = new Document()
+        all.with {
+            name = "All"
+            sourceFolders = ['UserRequirements', 'DesignRequirements', 'DeveloperGuide', 'TestRequirements']
+        }
+        
+        documentation {
+            documents = [all]
         }
         """
 
@@ -52,7 +65,7 @@ class AssembleDocumentTaskTest extends Specification {
         result.task(":assembleAll").outcome == SUCCESS
 
         and:
-        File outputHtml = new File(testProjectDir.root, 'build/documentation/all/section.html')
+        File outputHtml = new File(testProjectDir.root, 'build/documentation/all/UserRequirements/section.html')
         outputHtml.exists()
 
         and:

@@ -30,6 +30,17 @@ class MarkdownToHtmlTaskTest extends Specification {
          plugins {
             id 'com.alliancels.documentation'
         }
+        
+        import com.alliancels.documentation.Document
+        Document all = new Document()
+        all.with {
+            name = "All"
+            sourceFolders = ['UserRequirements']
+        }
+        
+        documentation {
+            documents = [all]
+        }
         """
 
         when:
