@@ -1,0 +1,17 @@
+buildscript {
+    repositories {
+    	mavenCentral()
+        // To function outside a composite, a plugin repository would be required.
+    }
+    dependencies {
+        classpath 'com.alliancels:documentation-gradle-plugins:0.0.6'
+    }
+}
+
+apply plugin: 'com.alliancels.documentation'
+
+documentation {
+    projectName = 'example'
+    version = 'version'
+    date = 'date'
+}
