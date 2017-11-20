@@ -9,204 +9,79 @@ class DocumentationPlugin implements Plugin<Project> {
     File links
     File documentationOutput
 
-    String userRequirementsDir
-    String designRequirementsDir
-    String testRequirementsDir
-    String developerDocumentationDir
-    List<String> allRequirementsDirs
-    List<String> allDocumentationDirs
-
     void apply(Project project) {
-
-        userRequirementsDir = 'UserRequirements'
-        designRequirementsDir = 'DesignRequirements'
-        developerDocumentationDir = 'DeveloperGuide'
-        testRequirementsDir = 'TestRequirements'
-
-        allRequirementsDirs = [userRequirementsDir, designRequirementsDir, testRequirementsDir]
-        allDocumentationDirs = [*allRequirementsDirs, developerDocumentationDir]
 
         documentationOutput = new File(project.buildDir, 'documentation/')
         convertedMarkdown = new File(documentationOutput, 'convertedMarkdown')
         links = new File(documentationOutput, 'links')
 
-        project.extensions.create('documentation', DocumentationPluginExtension.class)
+        def extension = project.extensions.create('documentation', DocumentationPluginExtension.class)
 
-        project.task('markdownToHtml', type: MarkdownToHtmlTask) {
-            description = "Convert all markdown files to html files"
-            include "**/*.md"
-            outputDir = convertedMarkdown
-            source allDocumentationDirs
-        }
+        // Dynamically create tasks based on documents list
+        project.afterEvaluate {
 
-        createTasksUserRequirementsOnly(project)
-        createTasksTestRequirementsOnly(project)
-        createTasksRequirements(project)
-        createTasksAll(project)
-        createTasksPreviewAll(project)
+            // Create a task to convert all markdown files
+            project.task('markdownToHtml', type: MarkdownToHtmlTask) {
+                description = "Convert all markdown files to html files"
+                include "**/*.md"
+                outputDir = convertedMarkdown
+                source getAllSourceFolders(extension.documents)
+            }
 
-        project.tasks.each {
-            it.group = "DocumentationPlugin"
-        }
-    }
+            // Create a set of tasks for each document defined by the user
+            extension.documents.each {
+                createDocumentTasks(project, it)
+            }
 
-    void createTasksRequirements(Project project) {
-
-        def allRequirementsOutput = new File(documentationOutput, 'allRequirements/')
-
-        project.task('copyImagesAllRequirements', type: FileCopyTask) {
-            description = "Copy images into the requirements output."
-            include "**/Images/**"
-            outputDir = allRequirementsOutput
-            source allRequirementsDirs
-        }
-
-        project.task('navigationAllRequirements', type: NavigationHtmlTask) {
-            description = "Create navigation page and navigation links."
-            include "**/layout.yaml"
-            linkOutputDir = links
-            navigationOutputDir = allRequirementsOutput
-            documentSourceDirs = allRequirementsDirs
-            source allRequirementsDirs
-        }
-
-        project.task('assembleRequirements', type: AssembleDocumentTask,
-                dependsOn: ['markdownToHtml', 'navigationAllRequirements', 'copyImagesAllRequirements']) {
-            description = "Assemble User and Design requirements, along with tests and status reports."
-            outputDir = allRequirementsOutput
-            linkDir = links
-            convertedMarkdownDir = convertedMarkdown
-            source links, convertedMarkdown
-            include "DesignRequirements/**/section.html"
-            include "UserRequirements/**/section.html"
-            include "TestRequirements/**/section.html"
-            previewEnabled = false
+            // Group all tasks under the DocumentationPlugin task category
+            project.tasks.each {
+                it.group = "DocumentationPlugin"
+            }
         }
     }
 
-    void createTasksUserRequirementsOnly(Project project) {
+    void createDocumentTasks(Project project, Document document) {
 
-        def userRequirementsOnlyOutput = new File(documentationOutput, 'userRequirementsOnly/')
+        File outputFolder = new File(documentationOutput, document.name + "/")
 
-        project.task('copyImagesUserRequirementsOnly', type: FileCopyTask) {
-            description = "Copy images into the user requirements output."
+        project.task("copyImages${document.name}", type: FileCopyTask) {
+            description = "Copy images into the output for the ${document.name} document."
             include "**/Images/**"
-            outputDir = userRequirementsOnlyOutput
-            source userRequirementsDir
+            outputDir = outputFolder
+            source document.sourceFolders
         }
 
-        project.task('navigationUserRequirementsOnly', type: NavigationHtmlTask) {
-            description = "Create navigation page and navigation links."
+        project.task("navigation${document.name}", type: NavigationHtmlTask) {
+            description = "Create navigation page and navigation links for the ${document.name} document."
             include "**/layout.yaml"
             linkOutputDir = links
-            navigationOutputDir = userRequirementsOnlyOutput
-            documentSourceDirs = [userRequirementsDir]
-            source userRequirementsDir
+            navigationOutputDir = outputFolder
+            documentSourceDirs = document.sourceFolders
+            source document.sourceFolders
         }
 
-        project.task('assembleUserRequirementsOnly', type: AssembleDocumentTask,
-                dependsOn: ['markdownToHtml', 'navigationUserRequirementsOnly', 'copyImagesUserRequirementsOnly']) {
-            description = "Assemble User Requirements, with no test or status reports."
-            outputDir = userRequirementsOnlyOutput
+        project.task("assemble${document.name}", type: AssembleDocumentTask,
+                dependsOn: ['markdownToHtml', "copyImages${document.name}", "navigation${document.name}"]) {
+            description = "Assemble the ${document.name} document."
+            outputDir = outputFolder
             linkDir = links
             convertedMarkdownDir = convertedMarkdown
             source links, convertedMarkdown
-            include "UserRequirements/**/section.html"
-            previewEnabled = false
+            previewEnabled = document.previewEnabled
+            document.sourceFolders.each {
+                include "${it}/**/section.html"
+            }
         }
     }
 
-    void createTasksTestRequirementsOnly(Project project) {
+    List<String> getAllSourceFolders(List<Document> documents) {
 
-        def testRequirementsOnlyOutput = new File(documentationOutput, 'testRequirementsOnly/')
+        List<String> allSourceFolders = []
 
-        project.task('copyImagesTestRequirementsOnly', type: FileCopyTask) {
-            description = "Copy images into the functional test requirements output."
-            include "**/Images/**"
-            outputDir = testRequirementsOnlyOutput
-            source testRequirementsDir
+        documents.each {
+            allSourceFolders += it.sourceFolders
         }
 
-        project.task('navigationTestRequirementsOnly', type: NavigationHtmlTask) {
-            description = "Create navigation page and navigation links."
-            include "**/layout.yaml"
-            linkOutputDir = links
-            navigationOutputDir = testRequirementsOnlyOutput
-            documentSourceDirs = [testRequirementsDir]
-            source testRequirementsDir
-        }
-
-        project.task('assembleTestRequirementsOnly', type: AssembleDocumentTask,
-                dependsOn: ['markdownToHtml', 'navigationTestRequirementsOnly', 'copyImagesTestRequirementsOnly']) {
-            description = "Assemble Product Functional Test Requirements, with no test or status reports."
-            outputDir = testRequirementsOnlyOutput
-            linkDir = links
-            convertedMarkdownDir = convertedMarkdown
-            source links, convertedMarkdown
-            include "TestRequirements/**/section.html"
-            previewEnabled = false
-        }
-    }
-
-    void createTasksPreviewAll(Project project) {
-
-        def previewOutput = new File(documentationOutput, 'previewAll/')
-
-        project.task('copyImagesPreview', type: FileCopyTask) {
-            description = "Copy images into the requirements preview output"
-            include "**/Images/**"
-            outputDir = previewOutput
-            source allDocumentationDirs
-        }
-        project.task('navigationPreview', type: NavigationHtmlTask) {
-            description = "Create navigation page and navigation links"
-            include "**/layout.yaml"
-            linkOutputDir = links
-            navigationOutputDir = previewOutput
-            documentSourceDirs = allDocumentationDirs
-            source allDocumentationDirs
-        }
-        project.task('assemblePreview', type: AssembleDocumentTask,
-                dependsOn: ['markdownToHtml', 'navigationPreview', 'copyImagesPreview']) {
-            description = "Same as assemble all (Assemble, but with browser auto-refresh enabled.  Intended to be" +
-                    "used in conjunction with Gradle's continuous build option (-t) to allow a live preview to be shown" +
-                    "whenever the source markdown is edited."
-            outputDir = previewOutput
-            linkDir = links
-            convertedMarkdownDir = convertedMarkdown
-            source links, convertedMarkdown
-            include "**/section.html"
-            previewEnabled = true
-        }
-    }
-
-    void createTasksAll(Project project) {
-
-        def allOutput = new File(documentationOutput, 'all/')
-
-        project.task('copyImagesAll', type: FileCopyTask) {
-            description = "Copy images into the requirements preview output"
-            include "**/Images/**"
-            outputDir = allOutput
-            source allDocumentationDirs
-        }
-        project.task('navigationAll', type: NavigationHtmlTask) {
-            description = "Create navigation page and navigation links"
-            include "**/layout.yaml"
-            linkOutputDir = links
-            navigationOutputDir = allOutput
-            documentSourceDirs = allDocumentationDirs
-            source allDocumentationDirs
-        }
-        project.task('assembleAll', type: AssembleDocumentTask,
-                dependsOn: ['markdownToHtml', 'navigationAll', 'copyImagesAll']) {
-            description = "Assembles all documentation"
-            outputDir = allOutput
-            linkDir = links
-            convertedMarkdownDir = convertedMarkdown
-            source links, convertedMarkdown
-            include "**/section.html"
-            previewEnabled = false
-        }
+        return allSourceFolders.unique()
     }
 }

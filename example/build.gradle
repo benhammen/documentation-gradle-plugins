@@ -8,10 +8,26 @@ buildscript {
     }
 }
 
+import com.alliancels.documentation.Document
 apply plugin: 'com.alliancels.documentation'
+
+Document all = new Document()
+all.with {
+	name = "All"
+	sourceFolders = ['UserRequirements', 'DesignRequirements', 'DeveloperGuide', 'TestRequirements']
+	previewEnabled = false
+}
+
+Document preview = new Document()
+preview.with {
+	name = "Preview"
+	sourceFolders = ['UserRequirements', 'DesignRequirements', 'DeveloperGuide', 'TestRequirements']
+	previewEnabled = true
+}
 
 documentation {
     projectName = 'example'
     version = 'version'
     date = 'date'
+    documents = [all, preview]
 }
