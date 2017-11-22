@@ -4,12 +4,6 @@ Use a template engine to populate a user-defined template with fields provided b
 
 This allows full control over the presentation of the generated HTML site.
 
-# Do not force conventions upon a project
-
-Split the existing documentation task conventions into a separate plugin.
-
-Let the user define an arbitrary number of tasks, each with an arbitrary number of input directories.
-
 # Add site-wide text search
 
 One or both of the following search approaches could be added:
