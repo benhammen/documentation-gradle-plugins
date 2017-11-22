@@ -116,3 +116,12 @@ Provide a way to bundle all ignored tests and tests that weren't run into a sing
 ## Generate boilerplate code for automated tests
 Parse all Unity test cases, and auto-generate the boilerplate code that adds test cases to test groups, and test groups to
 the test runner.  This will avoid the need to do this manually, and ensure that all test cases are actually being run.
+
+## Add support for automatically copying an existing section
+
+Sometimes, there may be a desire to make one section match another.  For example, there may be two parent sections that
+cover similar topics.  Some of their subsections will differ, but some might be identical.  Rather than duplicate the source
+of the identical subsections, the user can put no section.md file in a section folder, and instead use the layout.yaml file to
+specify another section's markdown file to use.
+
+The tool then creates a second instance of the converted markdown file.
