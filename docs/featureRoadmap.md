@@ -125,3 +125,8 @@ of the identical subsections, the user can put no section.md file in a section f
 specify another section's markdown file to use.
 
 The tool then creates a second instance of the converted markdown file.
+
+## Allow generating a rendered HTML DIFF between two versions
+
+https://github.com/killercup/scribbles/commit/dc7d6070ee7645c5afffbc40eacd294bb46ca44c?short_path=37b0d28#diff-37b0d286ed28750e62a9e0b93888457a
+https://deterministic.space/rich-diffs-of-rendered-html.html
