@@ -170,7 +170,7 @@ class HtmlPresenter {
     }
 
     String getNavigationNodeStart() {
-        return '<details open style="margin-left: 10px">'
+        return '<details open style="margin-left: 20px">'
     }
 
     String getNavigationNodeEnd() {
