@@ -11,6 +11,9 @@ class DocumentationPlugin implements Plugin<Project> {
 
     void apply(Project project) {
 
+        // Apply stanndard Gradle 'base' plug-in, to add the 'clean' task
+        project.apply(plugin: 'base')
+
         documentationOutput = new File(project.buildDir, 'documentation/')
         convertedMarkdown = new File(documentationOutput, 'convertedMarkdown')
         links = new File(documentationOutput, 'links')
