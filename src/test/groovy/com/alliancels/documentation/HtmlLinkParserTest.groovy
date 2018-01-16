@@ -16,4 +16,11 @@ class HtmlLinkParserTest extends Specification {
                                           "../path/to/section3.html", "../path/to/section4.html",
                                           "/path/to/image.png"]
     }
+
+    def "finds heading id's in html file"() {
+        when:
+        File html = new File("src/test/resources/section.html")
+        then:
+        HtmlLinkParser.getHeadingIds(html) == ["heading-1", "heading-2"]
+    }
 }

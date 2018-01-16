@@ -24,4 +24,15 @@ class HtmlLinkParser {
 
         return linksList
     }
+
+    static List<String> getHeadingIds(File htmlFile) {
+        Document document = Jsoup.parse(htmlFile, "UTF-8")
+
+        // Get all headings
+        Elements links = document.select("h1, h2, h3, h4, h5, h6")
+        // Filter ID's
+        List<String> headingIdList = links.eachAttr("id")
+
+        return headingIdList
+    }
 }
