@@ -23,4 +23,32 @@ class HtmlLinkParserTest extends Specification {
         then:
         HtmlLinkParser.getHeadingIds(html) == ["heading-1", "heading-2"]
     }
+
+    def "retrieve path from a link containing an anchor"() {
+        when:
+        String link = "../path/to/section1.html#heading-1"
+        then:
+        HtmlLinkParser.getLinkPath(link) == "../path/to/section1.html"
+    }
+
+    def "retrieve path from a link that doesn't contain an anchor"() {
+        when:
+        String link = "../path/to/section1.html"
+        then:
+        HtmlLinkParser.getLinkPath(link) == "../path/to/section1.html"
+    }
+
+    def "retrieve anchor from a link containing an anchor"() {
+        when:
+        String link = "../path/to/section1.html#heading-1"
+        then:
+        HtmlLinkParser.getLinkAnchor(link) == "heading-1"
+    }
+
+    def "returns null if retrieving an anchor from a link that doesn't contain an anchor"() {
+        when:
+        String link = "../path/to/section1.html"
+        then:
+        HtmlLinkParser.getLinkAnchor(link) == null
+    }
 }

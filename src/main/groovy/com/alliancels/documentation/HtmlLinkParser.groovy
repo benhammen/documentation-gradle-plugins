@@ -35,4 +35,23 @@ class HtmlLinkParser {
 
         return headingIdList
     }
+
+    private static boolean hasAnchor(String link) {
+
+        if (link.contains("#"))
+            return true
+        else
+            return false
+    }
+
+    static String getLinkPath(String link) {
+        return link.split('#').first()
+    }
+
+    static String getLinkAnchor(String link) {
+        if (!hasAnchor(link))
+            return null
+        else
+            return link.split('#').last()
+    }
 }
