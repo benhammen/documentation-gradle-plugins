@@ -51,4 +51,11 @@ class HtmlLinkParserTest extends Specification {
         then:
         HtmlLinkParser.getLinkAnchor(link) == null
     }
+
+    def "returns null if retrieving a path from a link that only contains an anchor"() {
+        when:
+        String link = "#anchor"
+        then:
+        HtmlLinkParser.getLinkPath(link) == null
+    }
 }
