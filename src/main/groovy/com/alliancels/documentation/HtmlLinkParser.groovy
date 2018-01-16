@@ -15,6 +15,13 @@ class HtmlLinkParser {
         // Get all links
         Elements links = document.select("a[href]")
         // Filter the actual link/path
-        return links.eachAttr("href")
+        List<String> linksList = links.eachAttr("href")
+
+        // Get all images
+        Elements images = document.getElementsByTag("img")
+        // Filter the image source/path
+        linksList += images.eachAttr("src")
+
+        return linksList
     }
 }
