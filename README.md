@@ -124,9 +124,7 @@ requirements.md example:
 
 	![example image](Images\example.png)
 	
-### Build Documentation
-
-#### Assemble documents
+### Assemble Documentation
 
 For each `Document` object defined in the build script, a task called `assemble<document name>' will be created.
 The output of the task will be in a folder matching the document name.  The root file of the generated document
@@ -192,6 +190,42 @@ Example: ``gradlew assemblePreview --continuous`
 
 Changes to existing markdown files will be visible shortly after saving.  Changes to the the folder
 structure of layout.yaml files will require the browser to be manually refreshed.
+
+### Check Documentation
+
+For each `Document` object defined in the build script, a task called `check<document name>' will be created.
+This task can be run to check for problems in the document.
+
+Currently, this only checks for broken links, including:
+   - Intrapage links (anchors within a page)
+   - Interpage links (file and optionally an anchor in the file)
+   - Image source paths
+
+For example, the following configuration will create tasks called "checkAll".  It will check the
+contents of `build/documentation/All`.
+
+```
+Document all = new Document()
+all.with {
+    name = "All"
+    sourceFolders = ['UserRequirements', 'DesignRequirements']
+    previewEnabled = false
+}
+
+// Setup plug-in
+documentation {
+    projectName = 'example'
+    // Document version
+    version = 'version'
+    date = 'date'
+    documents = [all]
+}
+```
+
+### Build Documentation
+
+For each `Document` object defined in the build script, a task called `build<document name>' will be created.
+This simply chains the "assemble" and "check" tasks into a single command.
 
 # Build
 
