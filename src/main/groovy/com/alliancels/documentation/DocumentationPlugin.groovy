@@ -83,6 +83,10 @@ class DocumentationPlugin implements Plugin<Project> {
                 include "${it}/**/*.html"
             }
         }
+
+        project.task("build${document.name}", dependsOn:["assemble${document.name}", "check${document.name}"]) {
+            description = "Build the ${document.name} document, by assembling it and checking it for problems."
+        }
     }
 
     List<String> getAllSourceFolders(List<Document> documents) {
