@@ -75,6 +75,18 @@ class DocumentationPlugin implements Plugin<Project> {
                 include "${it}/**/section.html"
             }
         }
+
+        project.task("check${document.name}", type: CheckDocumentTask) {
+            description = "Check the ${document.name} document for problems."
+            source outputFolder
+            document.sourceFolders.each {
+                include "${it}/**/*.html"
+            }
+        }
+
+        project.task("build${document.name}", dependsOn:["assemble${document.name}", "check${document.name}"]) {
+            description = "Build the ${document.name} document, by assembling it and checking it for problems."
+        }
     }
 
     List<String> getAllSourceFolders(List<Document> documents) {
