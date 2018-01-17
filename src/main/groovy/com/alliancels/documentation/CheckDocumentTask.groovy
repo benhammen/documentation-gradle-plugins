@@ -27,7 +27,9 @@ class CheckDocumentTask extends SourceTask {
             String linkPath = HtmlLinkParser.getLinkPath(link)
             String linkAnchor = HtmlLinkParser.getLinkAnchor(link)
 
-            if (linkPath == null) {
+            if (HtmlLinkParser.isLinkExternal(link)) {
+
+            } else if (linkPath == null) {
                 // Check links to anchor within same file
                 if (!HtmlLinkParser.getHeadingIds(file).contains(linkAnchor)) {
                     throw new GradleException("Broken link in $file.  Target anchor $linkAnchor in same file not found.")

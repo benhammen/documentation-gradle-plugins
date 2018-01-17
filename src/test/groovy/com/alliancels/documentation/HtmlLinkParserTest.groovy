@@ -58,4 +58,13 @@ class HtmlLinkParserTest extends Specification {
         then:
         HtmlLinkParser.getLinkPath(link) == null
     }
+
+    def "detects external links"() {
+        when:
+        String externalLink = "https://example.com#example"
+        String internalLink = "/path/to/section1.html"
+        then:
+        HtmlLinkParser.isLinkExternal(externalLink)
+        !HtmlLinkParser.isLinkExternal(internalLink)
+    }
 }
