@@ -62,4 +62,9 @@ class HtmlLinkParser {
         else
             return link.split('#').last()
     }
+
+    static boolean isLinkExternal(String link) {
+        if (link.contains("http"))
+            return true
+    }
 }

@@ -55,6 +55,7 @@ class CheckDocumentTaskTest extends Specification {
         <a href="image1.png">Link</a>
         <a href="#heading-2">Link</a>
         <h6 id="heading-2"><a name="Heading 2"></a>Heading 2</h6>
+        <a href="https://example.com#example">External link</a>
         """
         section2 << """
         <h6 id="heading-1"><a name="Heading 1"></a>Heading 1</h1>
