@@ -143,11 +143,13 @@ class NavigationHtmlTask extends SourceTask {
     }
 
     String getRelativePath(File file, File root) {
-        return root.toPath().relativize(file.toPath()).toString()
+        String relativePath = root.toPath().relativize(file.toPath()).toString()
+        String relativePathCrossPlatform = relativePath.replace("\\", "/")
+        return relativePathCrossPlatform
     }
 
     int getDepth(File file, File root) {
-        return getRelativePath(file, root).split('\\\\').size()
+        return getRelativePath(file, root).split('/').size()
     }
 
     int getDepthChange(File current, File next) {
