@@ -27,6 +27,10 @@ class CheckDocumentTask extends SourceTask {
             String linkPath = HtmlLinkParser.getLinkPath(link)
             String linkAnchor = HtmlLinkParser.getLinkAnchor(link)
 
+            if (link.contains("\\")) {
+                throw new GradleException("Invalid link in $file.  Replace back slash with forward slash in  $link.")
+            }
+
             if (HtmlLinkParser.isLinkExternal(link)) {
 
             } else if (linkPath == null) {

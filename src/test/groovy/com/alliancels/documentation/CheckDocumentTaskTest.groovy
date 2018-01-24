@@ -156,4 +156,21 @@ class CheckDocumentTaskTest extends Specification {
         then:
         result.getOutput().contains("Broken link in")
     }
+
+    def "checkAll tasks fail for link with forward slash"() {
+        given:
+        section1 << """
+        <a href="path/with/backslash\\section2.html#heading-1">Link</a>
+        """
+
+        when:
+        def result = GradleRunner.create()
+                .withProjectDir(testProjectDir.root)
+                .withArguments(['checkAll'])
+                .withPluginClasspath()
+                .buildAndFail()
+
+        then:
+        result.getOutput().contains("Invalid link in")
+    }
 }
