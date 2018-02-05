@@ -84,6 +84,37 @@ class HtmlPresenter {
                     Version ${version}, ${date}
             </header>
             <div id="nav">
+                <a href="#/" id="expAll" class="exp">EXPAND/COLLAPSE ALL</a>
+                <script type="text/javascript">
+                    // Reference the toggle link
+                    var xa = document.getElementById('expAll');
+
+                    // Register link on click event
+                    xa.addEventListener('click', function(e) 
+                    {
+                        // Toggle the two classes that represent "state" determined when link is clicked
+                        e.target.classList.toggle('exp');
+                        e.target.classList.toggle('col');
+
+                        // Collect all <details> into a NodeList
+                        var details = document.querySelectorAll('details');
+
+                        // Convert NodeList into an array then iterate through it...
+                        Array.from(details).forEach(function(obj, idx) 
+                        {
+                            // If the link has the class .exp, make each <detail>'s  attribute false
+                            if (e.target.classList.contains('exp')) 
+                            {
+                                obj.open = false;
+                            } 
+                            // Otherwise make it true 
+                            else 
+                            {
+                                obj.open = true;
+                            }
+                        });
+                    }, false);
+                </script>
                 ${navigationPaneContents}
             </div>
             <div id="content">
@@ -170,7 +201,7 @@ class HtmlPresenter {
     }
 
     String getNavigationNodeStart() {
-        return '<details open style="margin-left: 20px">'
+        return '<details style="margin-left: 20px">'
     }
 
     String getNavigationNodeEnd() {
