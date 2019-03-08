@@ -65,7 +65,7 @@ class AssembleDocumentTaskTest extends Specification {
         result.task(":assembleAll").outcome == SUCCESS
 
         and:
-        File outputHtml = new File(testProjectDir.root, 'build/documentation/all/UserRequirements/section.html')
+        File outputHtml = new File(testProjectDir.root, 'build/documentation/All/UserRequirements/section.html')
         outputHtml.exists()
 
         and:
