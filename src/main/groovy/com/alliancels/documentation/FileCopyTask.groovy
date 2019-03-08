@@ -16,21 +16,35 @@ class FileCopyTask extends SourceTask {
     void execute(IncrementalTaskInputs inputs) throws GradleException {
 
         if (!inputs.incremental) {
-            project.delete(outputDir.listFiles())
+
+            if (outputDir.listFiles() != null) {
+                project.delete(outputDir.listFiles())
+            }
         }
 
         inputs.outOfDate {
 
-            File outputFile = getOutputFile(it.file)
-            new AntBuilder().copy( file:"$it.file.canonicalPath",
-                    tofile:"$outputFile.canonicalPath")
+			// Only act on files, not directories
+            if (it.file.isFile()) {
+                File outputFile = getOutputFile(it.file)
+
+                def sourceStream = new File(it.file.canonicalPath).newDataInputStream()
+                def destinationStream = new File(outputFile.canonicalPath).newDataOutputStream()
+                destinationStream << sourceStream
+                sourceStream.close()
+                destinationStream.close()
+            }
         }
 
         inputs.removed {
-            File outputFile = getOutputFile(it.file)
 
-            if (outputFile.exists()) {
-                outputFile.delete()
+			// Only act on files, not directories
+            if (it.file.isFile()) {
+                File outputFile = getOutputFile(it.file)
+
+                if (outputFile.exists()) {
+                    outputFile.delete()
+                }
             }
         }
     }

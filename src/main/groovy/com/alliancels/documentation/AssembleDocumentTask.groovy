@@ -35,28 +35,35 @@ class AssembleDocumentTask extends SourceTask {
 
         inputs.outOfDate {
 
-            def relativePath = getRelativePath(it.file)
+            // Only act on files, not directories
+            if (it.file.isFile()) {
+                def relativePath = getRelativePath(it.file)
 
-            def links = new File(linkDir, relativePath).getText('UTF-8')
-            def content = new File(convertedMarkdownDir, relativePath).getText('UTF-8')
+                def links = new File(linkDir, relativePath).getText('UTF-8')
+                def content = new File(convertedMarkdownDir, relativePath).getText('UTF-8')
 
-            // Structure each section like this:
-            // <nav links>
-            // <content>
-            // <nav links>
-            File outputFile = getOutputFile(it.file)
-            String relativeOutputFilePath = outputDir.toPath().relativize(outputFile.toPath()).toString()
-            String completeSection = createCompleteSection(relativeOutputFilePath, links, content, previewEnabled)
-            outputFile.parentFile.mkdirs()
-            outputFile.createNewFile()
-            outputFile.setBytes(completeSection.getBytes("UTF-8"))
+                // Structure each section like this:
+                // <nav links>
+                // <content>
+                // <nav links>
+                File outputFile = getOutputFile(it.file)
+                String relativeOutputFilePath = outputDir.toPath().relativize(outputFile.toPath()).toString()
+                String completeSection = createCompleteSection(relativeOutputFilePath, links, content, previewEnabled)
+                outputFile.parentFile.mkdirs()
+                outputFile.createNewFile()
+                outputFile.setBytes(completeSection.getBytes("UTF-8"))
+            }
         }
 
         inputs.removed {
-            File outputFile = getOutputFile(it.file)
 
-            if (outputFile.exists()) {
-                outputFile.delete()
+			// Only act on files, not directories
+            if (it.file.isFile()) {
+                File outputFile = getOutputFile(it.file)
+
+                if (outputFile.exists()) {
+                    outputFile.delete()
+                }
             }
         }
     }

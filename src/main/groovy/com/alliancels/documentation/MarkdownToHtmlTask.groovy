@@ -34,23 +34,35 @@ class MarkdownToHtmlTask extends SourceTask {
     void execute(IncrementalTaskInputs inputs) throws GradleException {
 
         if (!inputs.incremental) {
-            project.delete(outputDir.listFiles())
+            
+            if (outputDir.listFiles() != null) {
+                project.delete(outputDir.listFiles())
+            }
         }
 
         inputs.outOfDate {
 
-            File outputFile = getOutputFile(it.file)
-            outputFile = convertMarkdownFileExtensionToHtml(outputFile)
-            outputFile.parentFile.mkdirs()
-            outputFile.createNewFile()
-            outputFile.setBytes(convertToHtml(it.file).getBytes("UTF-8"))
+            // Only act on files, not directories
+            if (it.file.isFile()) {
+
+                File outputFile = getOutputFile(it.file)
+
+                outputFile = convertMarkdownFileExtensionToHtml(outputFile)
+                outputFile.parentFile.mkdirs()
+                outputFile.createNewFile()
+                outputFile.setBytes(convertToHtml(it.file).getBytes("UTF-8"))
+            }
         }
 
         inputs.removed {
-            File outputFile = getOutputFile(it.file)
 
-            if (outputFile.exists()) {
-                outputFile.delete()
+            // Only act on files, not directories
+            if (it.file.isFile()) {
+                File outputFile = getOutputFile(it.file)
+
+                if (outputFile.exists()) {
+                    outputFile.delete()
+                }
             }
         }
     }
