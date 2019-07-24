@@ -132,7 +132,7 @@ class HtmlPresenter {
             //Create an event listener for each link, if link is clicked, run function below
             for (var i = 0; i < listOfLinks.length; i++) 
             {
-                listOfLinks[i].addEventListener("click", linkClickExpandsDetails(i));
+                listOfLinks[i].addEventListener("dblclick", linkClickExpandsDetails(i));
             };
             
             //Expand details if collapsed/collapse details if expanded
