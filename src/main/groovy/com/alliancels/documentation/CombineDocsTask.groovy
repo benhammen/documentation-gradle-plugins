@@ -36,6 +36,10 @@ class CombineDocsTask extends SourceTask {
 
     void createCombinedDocs() {
 
+        //Set page number to 1 when beginning document combine
+        int combinedPageNumber = 1;
+        int individualPageNumber = 1;
+
         //Create empty file for all in one combined doc
         File docBeingGenerated = new File("${project.buildDir}/documentation/All/AllDocsCombined.html")
         docBeingGenerated.createNewFile()
@@ -52,8 +56,8 @@ class CombineDocsTask extends SourceTask {
             //The order of how each page is added to the combined page matches the order followed in navigation
             //Add page individual document as well as all combined document
             def rootSection = Section.findSection(sections, new File(project.projectDir, it))
-            navigateDocDirectoryToBuildCombinedPage(rootSection, docBeingGenerated)
-			navigateDocDirectoryToBuildCombinedPage(rootSection, individualDocBeingGenerated)
+            navigateDocDirectoryToBuildCombinedPage(rootSection, docBeingGenerated, combinedPageNumber)
+			navigateDocDirectoryToBuildCombinedPage(rootSection, individualDocBeingGenerated, individualPageNumber)
 			
             //Clean up (remove) unwanted html bits (hide next and previous links and move headers to above individual sections)
             cleanUpCombinedDocHTML(individualDocBeingGenerated)
@@ -71,7 +75,7 @@ class CombineDocsTask extends SourceTask {
         addCombinedLinksToNavigation(addCombinedDocToNav)
     }
 	
-	void navigateDocDirectoryToBuildCombinedPage(Section section, File file) {
+	void navigateDocDirectoryToBuildCombinedPage(Section section, File file, int pageNumber) {
 		
 		Section sectionToBeAdd = section
 		
@@ -86,7 +90,14 @@ class CombineDocsTask extends SourceTask {
 		
             //Append section to combined page
             File htmlToAppend = new File("${project.buildDir}/documentation/All/$linkToAdd")
-            file.append(htmlToAppend.text)
+            //Get text of html file
+            String htmlToAppendContents = htmlToAppend.text
+            //Add page number
+            htmlToAppendContents = htmlToAppendContents.replaceFirst("<header>", ("<header>" + "Section " + pageNumber + " - "))  
+            //Append to combined
+            file.append(htmlToAppendContents)
+            //Increment page number
+            pageNumber++
             
             //Insert breaks and page separator indicator so it is easy to distinguish between sections of combined page
             file.append("<br>")
