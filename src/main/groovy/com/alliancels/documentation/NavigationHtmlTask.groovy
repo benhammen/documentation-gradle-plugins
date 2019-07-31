@@ -22,6 +22,9 @@ class NavigationHtmlTask extends SourceTask {
     List<String> documentSourceDirs
 
     List<Section> sections
+    
+    //Counter for number of node start html elements without node end html elements
+    int numOfNodeStartsWithoutNodeEnds = 0
 
     private HtmlPresenter htmlPresenter = new HtmlPresenter()
 
@@ -84,11 +87,16 @@ class NavigationHtmlTask extends SourceTask {
     void createNavigationPage() {
 
         def navigationPaneContents = ''
+        
+        numOfNodeStartsWithoutNodeEnds = 0
 
         documentSourceDirs.each {
             def rootSection = Section.findSection(sections,
                     new File(project.projectDir, it))
             navigationPaneContents += createNavigationNodes(rootSection)
+            
+            //Add node end html elements for each node start element without a corresponding end
+            navigationPaneContents += getNavigationNodeEnds(numOfNodeStartsWithoutNodeEnds)
         }
 
         def extensions = (DocumentationPluginExtension) getProject()
@@ -105,11 +113,15 @@ class NavigationHtmlTask extends SourceTask {
 
         String navigationPaneContents = ''
 
+        //Add node start html element
+        navigationPaneContents += htmlPresenter.getNavigationNodeStart()
+        //Increment node start html element counter
+        numOfNodeStartsWithoutNodeEnds++
+        
+        //Add link to navigation
         String relativePath = getRelativePath(section.folder, project.projectDir)
-
         String link = relativePath + "/section.html"
-        navigationPaneContents += htmlPresenter.getNavigationNodeStart() +
-                htmlPresenter.getNavigationLink(link, section.name)
+        navigationPaneContents += htmlPresenter.getNavigationLink(link, section.name)
 
         Section nextGroup = section.getNext(sections)
 
@@ -118,7 +130,6 @@ class NavigationHtmlTask extends SourceTask {
             // If the next group is a child of the current group, get the next group
             if (nextGroup.getParent(sections) == section) {
                 navigationPaneContents += createNavigationNodes(nextGroup)
-                navigationPaneContents += htmlPresenter.getNavigationNodeEnd()
             // If the next group is not a child of the current group
             } else {
                 int depthChange = getDepthChange(section.folder, nextGroup.folder)
@@ -165,6 +176,8 @@ class NavigationHtmlTask extends SourceTask {
         while (count > 0) {
             count--
             nodeEnds += htmlPresenter.getNavigationNodeEnd()
+            //Decrement node start html element counter
+            numOfNodeStartsWithoutNodeEnds--
         }
 
         return nodeEnds
