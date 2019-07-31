@@ -164,11 +164,11 @@ documentation {
 To get a list of all documentation tasks that have been created, invoke `gradlew tasks` and look at the tasks listed in the
 *DocumentationPlugin tasks* group.
 
-Note that task names can be camcel-case abbreviated.  For example, a task called "assembleAll" can be invoked using only "aA".
+Note that task names can be camel-case abbreviated.  For example, a task called "assembleAll" can be invoked using only "aA".
 
 #### Assemble documentation with live preview
 
-Manually invoking a rebuild of the HTML site after making a change is tedius.  To avoid this, it can
+Manually invoking a rebuild of the HTML site after making a change is tedious.  To avoid this, it can
 be auto-rebuilt and redisplayed whenever a requirements source file is saved.
 
 To allow this type of "live preview" of the generated HTML site, enable browser auto-refresh with setting the
@@ -193,6 +193,16 @@ Example: ``gradlew assemblePreview --continuous`
 
 Changes to existing markdown files will be visible shortly after saving.  Changes to the the folder
 structure of layout.yaml files will require the browser to be manually refreshed.
+
+### Combine Documentation
+
+Combines each individual markdown-converted-to-html section/file/page into one html file/page for each top level document source folder
+as well as one all-in-one combined document. The order in which each section/file/page is combined matches the order described above in 
+[layout.yaml](#layout.yaml). Since this is mostly intended to make it easy to print, some html elements are modified
+and section numbers are added.
+
+This task can be invoked with the "combineAll" command; the task is not automatically ran when "assembleAll" is invoked 
+because combined documentation doesn't always need to be generated and it may unnecessarily lengthen build times.
 
 ### Check Documentation
 
