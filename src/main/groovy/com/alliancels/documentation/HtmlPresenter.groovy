@@ -121,6 +121,39 @@ class HtmlPresenter {
                 <iframe name="sectionFrame"></iframe>
             </div>
         </div>
+
+        //JS for selecting hyperlink in navigation pane expands/collapses the subfolders to that hyperlink
+        <script type="text/javascript">
+
+            //Get list of link elements and details
+            var listOfLinks = document.getElementsByTagName('a');
+            var listOfDetails = document.querySelectorAll('details');
+            
+            //Create an event listener for each link, if link is clicked, run function below
+            for (var i = 0; i < listOfLinks.length; i++) 
+            {
+                listOfLinks[i].addEventListener("dblclick", linkClickExpandsDetails(i));
+            };
+            
+            //Expand details if collapsed/collapse details if expanded
+            function linkClickExpandsDetails(i)
+            {   
+                return function()
+                {
+                    //Must be i-1 because there is 1 more link than there are details due to the "EXPAND/COLLAPSE ALL" link at the top
+                    if(listOfDetails[i-1].open)
+                    {
+                        listOfDetails[i-1].open = false;
+                    }
+                    else
+                    {
+                        listOfDetails[i-1].open = true;
+                    }
+                };
+            };
+            
+        </script>
+
     </html>
     """
     }
