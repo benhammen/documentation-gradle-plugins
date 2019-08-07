@@ -17,6 +17,10 @@ class CombineDocsTask extends SourceTask {
 
     List<Section> sections
 
+    int sectionNumberingDepthIndex = 0
+
+    def sectionNumberingList = []
+
     @TaskAction
     void exec() throws GradleException {
 
@@ -32,6 +36,16 @@ class CombineDocsTask extends SourceTask {
         String relativePath = root.toPath().relativize(file.toPath()).toString()
         String relativePathCrossPlatform = relativePath.replace("\\", "/")
         return relativePathCrossPlatform
+    }
+
+    int getDepth(File file, File root) {
+        return getRelativePath(file, root).split('/').size()
+    }
+    
+    int getDepthDifference(File fromThisPath, File toThisPath) {
+        int change = getDepth(fromThisPath, project.projectDir) -
+                getDepth(toThisPath, project.projectDir)
+        return change
     }
 
     void createCombinedDocs() {
@@ -73,23 +87,30 @@ class CombineDocsTask extends SourceTask {
 	
 	void navigateDocDirectoryToBuildCombinedPage(Section section, File file) {
 		
-		Section sectionToBeAdd = section
-		
+        Section sectionToBeAdd = section
+
+        //Clear section numbering list and index before looping through each section to be added
+        sectionNumberingList = []
+        sectionNumberingDepthIndex = 0
+
 		//Loop through all sections (all pages in document)
 		while (sectionToBeAdd != null)
 		{
             //Get relative path to section to be added
             String pathToAdd = getRelativePath(sectionToBeAdd.folder, project.projectDir)
-		
+
             //Create link for section to be added
             String linkToAdd = pathToAdd + "/section.html"
-		
+
+            //Generate section numbering for section to be added
+            String sectionNumbering = generateSectionNumbering(sectionToBeAdd)
+
             //Append section to combined page
             File htmlToAppend = new File("${project.buildDir}/documentation/All/$linkToAdd")
             //Get text of html file
             String htmlToAppendContents = htmlToAppend.text
             //Add page number
-            htmlToAppendContents = htmlToAppendContents.replaceFirst("<header>", ("<header>" + "Section " + " - "))  
+            htmlToAppendContents = htmlToAppendContents.replaceFirst("<header>", ("<header>" + sectionNumbering + " "))  
             //Append to combined
             file.append(htmlToAppendContents)
             
@@ -102,7 +123,57 @@ class CombineDocsTask extends SourceTask {
             sectionToBeAdd = sectionToBeAdd.getNext(sections)
 		}
 	}
-	
+
+    String generateSectionNumbering(Section section) {
+        
+        //Get depth index of current section (dictates which number (x.y.z) should be modified for this section)
+        //(Depth differnce minus one because index is zero-based)  
+        sectionNumberingDepthIndex = getDepthDifference(section.folder, sections[0].folder) - 1
+        
+        Section nextSection = section.getNext(sections)
+        Section prevSection = section.getPrevious(sections)
+        
+        //If previous section is not null
+        //(That is if not the first section)
+        if(prevSection != null)
+        {
+            //Zero out lower section numbering if current section is new parent 
+            //(That is if current section is not a sibling or child of previous)
+            for(int i = sectionNumberingDepthIndex + 1; i < sectionNumberingList.size(); i++)
+            {
+               sectionNumberingList[i] = 0
+            }
+            
+            //If section is reaching new depth set new depth numbering to zero
+            if(sectionNumberingList[sectionNumberingDepthIndex] == null)
+            {
+                 sectionNumberingList[sectionNumberingDepthIndex] = 0
+            }
+            
+            //Increment section numbering
+            sectionNumberingList[sectionNumberingDepthIndex]++
+        }
+        
+        String sectionNumbering = ""
+        
+        //Turn section numbering array into string "x.y.z."
+        for (int i = 0; i < sectionNumberingList.size(); i++)
+        {
+            def sectionNumber = sectionNumberingList[i]
+            
+            //If section number is not null or zero then add it to 
+            // section numbering string with a "." in between each number
+            if(sectionNumber != null &&
+                sectionNumber != 0)
+            {
+                sectionNumbering += sectionNumberingList[i]
+                sectionNumbering += "."
+            }
+        }
+        
+        return sectionNumbering
+    }
+
 	void addCombinedLinksToNavigation(String docToLink) {
 
         //Get navigation file to modify
