@@ -127,15 +127,11 @@ class CombineDocsTask extends SourceTask {
     String generateSectionNumbering(Section section) {
         
         //Get depth index of current section (dictates which number (x.y.z) should be modified for this section)
-        //(Depth differnce minus one because index is zero-based)  
-        sectionNumberingDepthIndex = getDepthDifference(section.folder, sections[0].folder) - 1
+        //(Subtract one so that if current section is at same depth as source no numbering is added for title section)
+        sectionNumberingDepthIndex = getDepthDifference(section.folder, project.projectDir) - 1
         
-        Section nextSection = section.getNext(sections)
-        Section prevSection = section.getPrevious(sections)
-        
-        //If previous section is not null
-        //(That is if not the first section)
-        if(prevSection != null)
+        //If not the title section (document source section)
+        if(sectionNumberingDepthIndex >= 0)
         {
             //Zero out lower section numbering if current section is new parent 
             //(That is if current section is not a sibling or child of previous)
