@@ -87,7 +87,7 @@ class NavigationHtmlTask extends SourceTask {
                 
                 navigationLinkHtml = HtmlPresenter.getPreviousLink(previousLink)
             } else {
-                GradleException("No next or previous section was found for " + it.folder.toString())
+                throw new GradleException("No next or previous section was found for " + it.folder.toString())
             }
 
             // Create html file with links
@@ -167,11 +167,16 @@ class NavigationHtmlTask extends SourceTask {
         outputPath.mkdirs()
         
         //Get name of link file to be created by copying file name in converted markdown folder
-        String pathToFileName = project.buildDir.toString() + "\\documentation\\convertedMarkdown\\" + relativePath
+        String pathToFileName = project.buildDir.toString() + "/documentation/convertedMarkdown/" + relativePath
         File fileToCopyNameFrom = new File (pathToFileName)
         File[] listFiles = fileToCopyNameFrom.listFiles()
         //Default file name to "section.html"
         String fileNameToCopy = "section.html"
+
+        if (listFiles == null) {
+            throw new GradleException("No files found in " + fileToCopyNameFrom.toString())
+        }
+
         //Get name of first file in list (ignore directories)
         for(int i = 0; i < listFiles.length; i++)
         {
