@@ -19,7 +19,7 @@ buildscript {
         //For Gradle 3.x:
         //classpath 'com.alliancels:documentation-gradle-plugins:0.0.14'
         //For Gradle 5.x:
-        classpath 'com.alliancels:documentation-gradle-plugins:0.1.2'
+        classpath 'com.alliancels:documentation-gradle-plugins:0.1.3'
     }
 }
 ```
