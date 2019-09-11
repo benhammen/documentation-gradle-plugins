@@ -101,7 +101,7 @@ class CombineDocsTask extends SourceTask {
 
             
             //Get name of link file to be created by copying file name in converted markdown folder
-            String pathToFileName = project.buildDir.toString() + "\\documentation\\convertedMarkdown\\" + pathToAdd
+            String pathToFileName = project.buildDir.toString() + "/documentation/convertedMarkdown/" + pathToAdd
             File fileToCopyNameFrom = new File (pathToFileName)
             File[] listFiles = fileToCopyNameFrom.listFiles()
             //Default file name to "section.html"
@@ -116,7 +116,7 @@ class CombineDocsTask extends SourceTask {
             }
             
             //Create link for section to be added
-            String linkToAdd = pathToAdd + "\\" + fileNameToCopy
+            String linkToAdd = pathToAdd + "/" + fileNameToCopy
             
             //Generate section numbering for section to be added
             String sectionNumbering = generateSectionNumbering(sectionToBeAdd)
