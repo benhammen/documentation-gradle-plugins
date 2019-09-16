@@ -1,4 +1,4 @@
-## Blue
+## Blue Subsection
 
 - Red link: !Red!
 - Green link: !Green!
