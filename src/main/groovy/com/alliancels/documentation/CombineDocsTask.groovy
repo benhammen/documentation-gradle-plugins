@@ -29,12 +29,14 @@ class CombineDocsTask extends SourceTask {
         source.each {
             sections.add((new LayoutParser()).createSection(it))
         }
+        
+        println("Updating glossary terms with links...")
+        GlossaryAutoLink.autoLinkGlossary(sections, project.buildDir, project.projectDir)
+        
+        println("Generating combined docs...")
         createCombinedDocs()
         
-        println("Updating links...")
-        println(project.buildDir)
-        println(project.projectDir)
-        GlossaryAutoLink.autoLinkGlossary(sections, project.buildDir, project.projectDir)
+        
     }
 
     String getRelativePath(File file, File root) {

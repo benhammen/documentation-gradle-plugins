@@ -9,16 +9,23 @@ import org.jsoup.select.Elements
  * Automatically find and replace glossary terms with glossary links
  */
 class GlossaryAutoLink {
+    static List<String> listOfTerms = []
+    static List<String> listOfLinks = []
+    static List<String> listOfAnchors = []
     
     static void autoLinkGlossary(List<Section> sectionList, File buildDirectory, File sourceDirectory) {
 
+        //Create list of glossary sections
         List<Section> glossarySectionList = findGlossarySections(sectionList)
+        
+        //If one or more glossaries exist in documentation
         if(glossarySectionList.size() > 0)
         {
-            println("Glossary found!")
+            //Create list of terms, links, and anchors
+            createTermsLists(sectionList, glossarySectionList, sourceDirectory, buildDirectory)
             
-            //
-            createLinkAndTermLists(sectionList, glossarySectionList, buildDirectory, sourceDirectory)
+            //Replace each term with its corresponding link
+            autoLinkTerms(sectionList, sourceDirectory, buildDirectory)
         }
         else
         {
@@ -30,7 +37,9 @@ class GlossaryAutoLink {
     
         List<Section> glossarySectionList = []
         
+        //For each section of documentation
         sectionList.each {
+            //If the section name is "Glossary" add it to glossary list
             if(it.name == "Glossary")
             {
                 glossarySectionList.add(it)
@@ -39,122 +48,111 @@ class GlossaryAutoLink {
         
         if(glossarySectionList.size() > 0)
         {
-            println("Number of glossaries: " + glossarySectionList.size())
+            println("Number of glossaries found: " + glossarySectionList.size())
         }
         
         return glossarySectionList
     }
     
-    static void createLinkAndTermLists(List<Section> sectionList, List<Section> glossarySectionList, File buildDirectory, File sourceDirectory) {
+    static void createTermsLists(List<Section> sectionList, List<Section> glossarySectionList, File sourceDirectory, File buildDirectory) {
     
-        println("Creating glossary term list...")
+        listOfTerms = []
+        listOfLinks = []
+        listOfAnchors = []
         
-        List<String> listOfTerms = []
-        List<String> listOfLinks = []
-        
+        //For each glossary section
         glossarySectionList.each {
-            File glossaryFile = it.folder
-            println("Gls: " + glossaryFile)
-            println("Src: " + sourceDirectory)
-            println("Dst: " + buildDirectory)
-            
-            String glsString = glossaryFile.toString()
-            String srcString = sourceDirectory.toString()
-            String dstString = buildDirectory.toString()
-            
-            println("glsString: " + glsString)
-            println("srcString: " + srcString)
-            println("dstString: " + dstString)
-            
-            String glossaryFileString = glsString - srcString
-            println("Glossary file postfix: " + glossaryFileString) 
-            
-            glossaryFileString = dstString + "/documentation/All" + glossaryFileString
-            println("Glossary file: " + glossaryFileString)
-            
+            //Get corresponding glossary html file
+            File glossaryFile = getBuildFileFromSourceFile(it.folder, sourceDirectory, buildDirectory)
+            String glossaryFileString = glossaryFile.toString()
             glossaryFileString = glossaryFileString + "/Glossary.html"
-            println("Glossary file complete: " + glossaryFileString)
-            
             glossaryFile = new File(glossaryFileString)
-            println(glossaryFile)
-        
+            
+            //Get text of html file
             String glossaryFileText = glossaryFile.getText()
             
+            //Parse html text
             Document document = Jsoup.parse(glossaryFileText, "UTF-8")
             
-            //Get values in first column
+            //Extract all first column text values from glossary table
             Elements terms = document.select("td:eq(0)").select("td")
+            //Extract all second column text values from glossary table
             Elements links = document.select("td:eq(1)").select("td")
-            println(terms)
-            println(links)
+            //Extract all third column text values from glossary table
+            Elements anchors = document.select("td:eq(2)").select("td")
             
+            //Add text values to corresponding string lists
             listOfTerms += terms.eachText()
             listOfLinks += links.eachText()
-            println(listOfTerms)
-            println(listOfLinks)
-        }
-        
-        //autoLinkGlossaries(sectionList, listOfTerms, listOfLinks)
-        
-        
-        println("++++++++++++++++++++++++++++++++++++++")
-        println("++++++++++++++++++++++++++++++++++++++")
-        println("++++++++++++++++++++++++++++++++++++++")
-        println("======================================")
-        println("======================================")
-        println("======================================")
-        
-        
-        
-        //FUNCTION IN LINE
-        println("Auto linking terms...")
-        
-        sectionList.each {
-            File eachHypertextFile = it.folder
-            println("Hyp: " + eachHypertextFile)
-            println("Src: " + sourceDirectory)
-            println("Dst: " + buildDirectory)
-            
-            String hypString = eachHypertextFile.toString()
-            String srcString = sourceDirectory.toString()
-            String dstString = buildDirectory.toString()
-            
-            println("hypString: " + hypString)
-            println("srcString: " + srcString)
-            println("dstString: " + dstString)
-            
-            String eachHypertextString = hypString - srcString
-            println("Hypertext file postfix: " + eachHypertextString) 
-            
-            eachHypertextString = dstString + "/documentation/All" + eachHypertextString
-            println("Hypertext file: " + eachHypertextString)
-            
-            //eachHypertextString = eachHypertextString + "/section.html"
-            //println("Hypertext file complete: " + eachHypertextString)
-            
-            eachHypertextFile = new File(eachHypertextString)
-            println("Each hypertext file: " + eachHypertextFile)
-            
-            boolean testIsFile = eachHypertextFile.isFile()
-            println("File? " + testIsFile)
-            println("Folder? " + !testIsFile)
-            
-            println(eachHypertextFile.listFiles())
-            
-            //TODO:
-            //-Find the html file in the folder resolved above
-            //-Find and replace each term with each link in each html file
+            listOfAnchors += anchors.eachText()
         }
     }
     
-    static void autoLinkGlossaries(List<Section> sectionList, List<String> listOfTerms, List<String> listOfLinks) {
-
-        println("Auto linking terms...")
+    static void autoLinkTerms(List<Section> sectionList, File sourceDirectory, File buildDirectory) {
         
-        //sectionList.each {
-        //    println(it.folder)
+        println("List of terms: " + listOfTerms)
+        println("List of links: " + listOfLinks)
+        println("List of Anchors: " + listOfAnchors)
+
+        //For each section of documentation
+        sectionList.each {
+            //Get corresponding html file
+            File eachHypertextFile = getBuildFileFromSourceFile(it.folder, sourceDirectory, buildDirectory)
+            //Use filter to grab only the .html files and not a subfolder (or image folder or other reference document)
+            FilenameFilter htmlFileFilter = new FilenameFilter() {
+                public boolean accept(File f, String name)
+                {
+                    return name.endsWith("html")
+                }
+            }
+            File[] htmlFileList = eachHypertextFile.listFiles(htmlFileFilter)
+            File htmlFile = htmlFileList[0]
             
+            //Get text of html file
+            String htmlFileText = htmlFile.text
             
-        //}
+            //Pieces of raw html link
+            String htmlLinkPrefix = "<a href="
+            String htmlLinkInfix = ">"
+            String htmlLinkPostfix = "</a>"
+            
+            //Loop through each term
+            for(int i = 0; i < listOfTerms.size; i++)
+            {
+                //Create direct refernce link to be added
+                String linkToAdd = buildDirectory.toString().replace("\\", "/") + "/documentation/All/"
+                
+                //Do not add anchors that are not applicable
+                String includeAnchor = ""
+                if(listOfAnchors[i] != ".")
+                {
+                    includeAnchor = listOfAnchors[i] 
+                }
+                //<a href= + "direct reference file path" + link + anchor + > + term + </a> 
+                linkToAdd = htmlLinkPrefix +  linkToAdd + listOfLinks[i] + includeAnchor + htmlLinkInfix + listOfTerms[i] + htmlLinkPostfix
+                
+                //Find and replace all/each instance of "!term!" in documentaiton with its corresponding link 
+                htmlFileText = htmlFileText.replaceAll(("!" + listOfTerms[i] + "!"), linkToAdd)
+            }
+            
+            htmlFile.text = htmlFileText
+        }
+        
+        println("Terms linked!")
+    }
+    
+    static File getBuildFileFromSourceFile(File sourceFile, File sourceDirectory, File buildDirectory) {
+        
+        String filString = sourceFile.toString()
+        String srcString = sourceDirectory.toString()
+        String bldString = buildDirectory.toString()
+        
+        String buildFileString = filString - srcString
+        
+        buildFileString = bldString + "/documentation/All" + buildFileString
+        
+        File buildFile = new File(buildFileString)
+        
+        return buildFile
     }
 }
