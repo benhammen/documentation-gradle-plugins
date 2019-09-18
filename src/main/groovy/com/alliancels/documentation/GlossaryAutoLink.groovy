@@ -40,7 +40,7 @@ class GlossaryAutoLink {
         //For each section of documentation
         sectionList.each {
             //If the section name is "Glossary" add it to glossary list
-            if(it.name == "Glossary")
+            if(it.name == "Glossary" || it.name == "glossary")
             {
                 glossarySectionList.add(it)
             }
@@ -65,7 +65,7 @@ class GlossaryAutoLink {
             //Get corresponding glossary html file
             File glossaryFile = getBuildFileFromSourceFile(it.folder, sourceDirectory, buildDirectory)
             String glossaryFileString = glossaryFile.toString()
-            glossaryFileString = glossaryFileString + "/Glossary.html"
+            glossaryFileString = glossaryFileString + "/glossary.html"
             glossaryFile = new File(glossaryFileString)
             
             //Get text of html file
