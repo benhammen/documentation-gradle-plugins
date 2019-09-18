@@ -30,13 +30,11 @@ class CombineDocsTask extends SourceTask {
             sections.add((new LayoutParser()).createSection(it))
         }
         
-        println("Updating glossary terms with links...")
+        println("Updating glossary terms and links...")
         GlossaryAutoLink.autoLinkGlossary(sections, project.buildDir, project.projectDir)
         
         println("Generating combined docs...")
         createCombinedDocs()
-        
-        
     }
 
     String getRelativePath(File file, File root) {
@@ -76,20 +74,26 @@ class CombineDocsTask extends SourceTask {
             navigateDocDirectoryToBuildCombinedPage(rootSection, docBeingGenerated)
 			navigateDocDirectoryToBuildCombinedPage(rootSection, individualDocBeingGenerated)
 			
-            //Clean up (remove) unwanted html bits (hide next and previous links and move headers to above individual sections)
-            cleanUpCombinedDocHTML(individualDocBeingGenerated)
+            //Replace all  glossary terms with corresponding links. Update all other links in combined docs.
+            // Clean up (remove) unwanted html bits in combined docs 
+            // (remove next and previous links, move headers to above individual sections, add section numbering).
+            GlossaryAutoLink.cleanUpAndLinkCombinedDoc(individualDocBeingGenerated, project.buildDir)
             
             //Add combined link to navigation page
             String addDocToNav = "${it}"
             addCombinedLinksToNavigation(addDocToNav)
 		}
 		
-        //Clean up (remove) unwanted html bits (hide next and previous links and move headers to above individual sections)
-        cleanUpCombinedDocHTML(docBeingGenerated)
+        //Replace all  glossary terms with corresponding links. Update all other links in combined docs.
+        // Clean up (remove) unwanted html bits in combined docs 
+        // (remove next and previous links, move headers to above individual sections, add section numbering).
+        GlossaryAutoLink.cleanUpAndLinkCombinedDoc(docBeingGenerated, project.buildDir)
 		
         //Add combined link to navigation page 
         String addCombinedDocToNav = "AllDocsCombined"
         addCombinedLinksToNavigation(addCombinedDocToNav)
+        
+        println("Docs generated!")
     }
 	
 	void navigateDocDirectoryToBuildCombinedPage(Section section, File file) {
@@ -130,6 +134,10 @@ class CombineDocsTask extends SourceTask {
             
             //Append section to combined page
             File htmlToAppend = new File("${project.buildDir}/documentation/All/$linkToAdd")
+            
+            //Update relative links to abosolute links
+            GlossaryAutoLink.updateCombinedDocLinks(htmlToAppend)
+            
             //Get text of html file
             String htmlToAppendContents = htmlToAppend.text
             //Add page number
@@ -211,22 +219,5 @@ class CombineDocsTask extends SourceTask {
             //Replace old text contents with link added contents
             navFile.text = navContents
         }
-    }
-    
-    void cleanUpCombinedDocHTML(File fileToCleanUp) {
-    
-        //Get contents of file to clean up
-        String contents = fileToCleanUp.getText( 'UTF-8' )
-        
-        //Remove header element tags (this moves the header text to above the individual section instead of stacked at the top of the combined doc)
-        contents = contents.replaceAll("<header>", '')
-        contents = contents.replaceAll("</header>", '')
-        
-        //Remove text of Next and Previous buttons (the html elements remain but without text they do not appear on the page)
-        contents = contents.replaceAll(">Previous<", "><")
-        contents = contents.replaceAll(">Next<", "><")
-        
-        //Set file to now cleaned up contents 
-        fileToCleanUp.text = contents
     }
 }
