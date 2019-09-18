@@ -38,7 +38,7 @@
 <a href="http://github.com/" target="_blank">Github</a>
 
 #### Example Document Link
-[Design Requirements](../../section.html)
+[Design Requirements](../../../DesignRequirements/section.html)
 
 #### Example Jump-To Link
 [Jump to first table example](#example-markdown-table)
@@ -47,7 +47,7 @@
 This is a block of text which contains a link to [first table example](#example-markdown-table).  This is another sentence in the block of text.
 
 #### Example Document Link (in a block of text)
-This is a block of text which contains a link to [Design Requirements](../../section.html). This is another sentence in the block of text. 
+This is a block of text which contains a link to [User Requirements Subsection3](../../Subsection3/section.html). This is another sentence in the block of text. 
 
 #### Another example header
 This is just some text that is typed out to make a long line of text.
@@ -70,8 +70,9 @@ This is a block of text which contains a link to [first table example](#example-
 
 #### List-Of-Links
 
-- [Design Requirements](../../section.html) (Document Link)
-- [Test Requirements](../../section.html) (Document Link)
+- [Design Requirements](../../../DesignRequirements/section.html) (Document Link)
+- [Design Requirements Subsection](../../../DesignRequirements/Subsection/section.html) (Document Link)
+- [Test Requirements](../../../TestRequirements/section.html) (Document Link)
 - [First table example](#example-markdown-table) (Jump-To Link)
 - [Second table example](#example-html-table) (Jump-To Link)
 
