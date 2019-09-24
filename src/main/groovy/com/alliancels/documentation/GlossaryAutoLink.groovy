@@ -92,11 +92,14 @@ class GlossaryAutoLink {
                 listOfAnchors += anchors.eachText()
                 
                 //Remove link and anchor columns (these do not need to be seen in the final documentation)
-                document.select("td:eq(1)").select("td").remove()
-                document.select("td:eq(1)").select("td").remove()
-                document.select("th:eq(1)").select("th").remove()
-                document.select("th:eq(1)").select("th").remove()
-                glossaryFile.text = document.toString()
+                Elements removeTableElements = document.select("td:eq(1)").select("td")
+                removeTableElements += document.select("td:eq(2)").select("td")
+                removeTableElements += document.select("th:eq(1)").select("th")
+                removeTableElements += document.select("th:eq(2)").select("th")
+                for(int i = 0; i < removeTableElements.size(); i++)
+                {
+                    glossaryFile.text = glossaryFile.text.replaceAll(removeTableElements[i].toString(), "")
+                }
             }
         }
     }
@@ -181,10 +184,9 @@ class GlossaryAutoLink {
         //Parse html contents
         Document document = Jsoup.parse(combinedHtmlContents, "UTF-8")
 
-        //Remove all next/previous
+        //Remove all next/previous div elements
         document.select("div:contains(Next)").remove()
         document.select("div:contains(Previous)").remove()
-        combinedHtmlContents = document.toString()
 
         //Get all ids
         Elements ids = document.select("header").next()
@@ -230,6 +232,11 @@ class GlossaryAutoLink {
         //Modify headers so that they appear at top of each individual page instead of overlapped at the top of the combined doc
         combinedHtmlContents = combinedHtmlContents.replaceAll("<header>", "") 
         combinedHtmlContents = combinedHtmlContents.replaceAll("</header>", "")
+        
+        //Hide all next/previous
+        combinedHtmlContents = combinedHtmlContents.replaceAll(">Next<", "><")
+        combinedHtmlContents = combinedHtmlContents.replaceAll(">Previous<", "><")
+        
         fileToCleanUpAndLink.text = combinedHtmlContents
     }
     
@@ -244,6 +251,8 @@ class GlossaryAutoLink {
         //For each link element
         for(Element linkElement : elements)
         {
+            //Get original link element (for replacing later)
+            String oldLinkElement = linkElement.toString()
             if(HtmlLinkParser.isLinkExternal(linkElement.toString()))
             {
                 //If the link references external web page do nothing
@@ -301,11 +310,14 @@ class GlossaryAutoLink {
                         linkElement.attr("href", newLinkPath)
                     
                     }
+                    
+                    //Add escape sequences to original link element
+                    oldLinkElement = oldLinkElement.replace("\\", "\\\\")
+                    
+                    //Replace each original link element with updated new link element
+                    fileToUpdateLinks.text = fileToUpdateLinks.text.replaceAll(oldLinkElement, linkElement.toString())
                 }
             }
         }
-        
-        //Copy/replace old html text with now link updated html text
-        fileToUpdateLinks.text = document.toString()
     }
 }
