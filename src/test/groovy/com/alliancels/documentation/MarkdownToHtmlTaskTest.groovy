@@ -140,4 +140,17 @@ class MarkdownToHtmlTaskTest extends Specification {
                 </table>
                 """.stripIndent().trim() + "\n"
     }
+
+    def "converts markdown links to html links"() {
+        given:
+        File markdown = testProjectDir.newFile('markdown')
+        String link = "[Link to subsection](Subsection/subsection.md)"
+        markdown.setBytes(link.getBytes("UTF-8"))
+
+        when:
+        String html = MarkdownToHtmlTask.convertToHtml(markdown)
+
+        then:
+        html == "<p><a href=\"Subsection/subsection.html\">Link to subsection</a></p>\n"
+    }
 }
