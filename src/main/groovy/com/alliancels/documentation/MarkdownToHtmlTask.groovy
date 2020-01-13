@@ -90,7 +90,11 @@ class MarkdownToHtmlTask extends SourceTask {
         }
 
         Node document = parser.parse(file.getText('UTF-8'))
-        return renderer.render(document)
+
+        String string = renderer.render(document)
+
+        // Convert markdown link extensions to HTML
+        return string.replaceAll('.md', '.html')
     }
 
     File convertMarkdownFileExtensionToHtml(File file) {

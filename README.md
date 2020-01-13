@@ -91,12 +91,12 @@ Under the top-level requirements folders, a hierarchy of subfolders for each req
 
 Each folder must contain a markdown file containing the section contents.
 
-Links to other sections should use relative paths, and should use the *.html suffix rather than
-the *.md suffix.
+Links to other sections should use relative paths. Any *.md suffix will automatically be replaced by an *.html suffix.
+(Using the *.md suffix in the IntelliJ editor allows jumping to other markdown files in the "preview" pane.)
 
 UserRequirements\Section1\Section1-1\requirements.md example:
 
-	[link to Section2](..\..\Section2\requirements.html)
+	[link to Section2](..\..\Section2\requirements.md)
 
 #### layout.yaml
 
